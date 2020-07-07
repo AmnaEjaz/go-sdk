@@ -56,7 +56,7 @@ func (r RolloutService) GetDecision(decisionContext FeatureDecisionContext, user
 		evalResult, _ := r.audienceTreeEvaluator.Evaluate(experiment.AudienceConditionTree, condTreeParams)
 		if !evalResult {
 			featureDecision.Reason = reasons.FailedRolloutTargeting
-			r.logger.Debug(fmt.Sprintf(`User "%s" failed targeting for feature rollout with key "%s".`, userContext.ID, feature.Key))
+			r.logger.Debug(fmt.Sprintf(`User "%s" does not meet conditions for targeting rule %s.`, userContext.ID, feature.Key)) // python logger has logging_key, not sure if feature.key is logging_key
 		}
 		return evalResult
 	}

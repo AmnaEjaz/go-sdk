@@ -38,7 +38,7 @@ type ExperimentBucketerService struct {
 func NewExperimentBucketerService(logger logging.OptimizelyLogProducer) *ExperimentBucketerService {
 	// @TODO(mng): add experiment override service
 	return &ExperimentBucketerService{
-		logger:logger,
+		logger:                logger,
 		audienceTreeEvaluator: evaluator.NewMixedTreeEvaluator(),
 		bucketer:              *bucketer.NewMurmurhashExperimentBucketer(logger, bucketer.DefaultHashSeed),
 	}
@@ -54,6 +54,7 @@ func (s ExperimentBucketerService) GetDecision(decisionContext ExperimentDecisio
 		condTreeParams := entities.NewTreeParameters(&userContext, decisionContext.ProjectConfig.GetAudienceMap())
 		evalResult, _ := s.audienceTreeEvaluator.Evaluate(experiment.AudienceConditionTree, condTreeParams)
 		if !evalResult {
+			s.logger.Debug(fmt.Sprintf(`User "%s" does not meet conditions to be in experiment "%s".`, userContext.ID, experiment.Key))
 			experimentDecision.Reason = reasons.FailedAudienceTargeting
 			return experimentDecision, nil
 		}
