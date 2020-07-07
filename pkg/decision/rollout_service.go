@@ -75,7 +75,7 @@ func (r RolloutService) GetDecision(decisionContext FeatureDecisionContext, user
 
 		featureDecision.Experiment = *experiment
 		featureDecision.Variation = decision.Variation
-		r.logger.Debug(fmt.Sprintf(`Decision made for user "%s" for feature rollout with key "%s": %s.`, userContext.ID, feature.Key, featureDecision.Reason))
+		r.logger.Debug(fmt.Sprintf(`User "%s" meets conditions for targeting rule "Everyone Else".`, userContext.ID))
 		return featureDecision, nil
 	}
 
@@ -117,9 +117,8 @@ func (r RolloutService) GetDecision(decisionContext FeatureDecisionContext, user
 	// fall back rule / last rule
 	experiment := &rollout.Experiments[numberOfExperiments-1]
 	experimentDecisionContext := getExperimentDecisionContext(experiment)
-	loggingKey := strconv.Itoa(numberOfExperiments)
 	// Move to bucketing if conditionTree is unavailable or evaluation passes
-	if experiment.AudienceConditionTree == nil || evaluateConditionTree(experiment, loggingKey) {
+	if experiment.AudienceConditionTree == nil || evaluateConditionTree(experiment, "Everyone Else") {
 		decision, _ := r.experimentBucketerService.GetDecision(experimentDecisionContext, userContext)
 		return getFeatureDecision(experiment, &decision)
 	}
